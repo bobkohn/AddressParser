@@ -8,6 +8,41 @@
 ''' </remarks>
 Public Class Parser
 
+#Region "-- shared functions --"
+
+    ''' <summary>
+    ''' Parser objects are equal if all components are the same, even if raw address is different
+    ''' </summary>
+    ''' <param name="obj1"></param>
+    ''' <param name="obj2"></param>
+    ''' <returns></returns>
+    Public Shared Function EqualParsers(obj1 As Object, obj2 As Object) As Boolean
+        Dim i As Integer
+        Dim p1 As AddressParser.Parser, p2 As AddressParser.Parser
+        If TypeOf obj1 Is AddressParser.Parser And TypeOf obj2 Is AddressParser.Parser Then
+            p1 = CType(obj1, AddressParser.Parser)
+            p2 = CType(obj2, AddressParser.Parser)
+            If p1.HouseNum = p2.HouseNum And p1.HouseSuf = p2.HouseSuf And p1.PreDir = p2.PreDir And p1.Street = p2.Street And p1.StSuf = p2.StSuf And p1.PostDir = p2.PostDir Then
+                If p1.SUD.Count = p2.SUD.Count Then
+                    For i = 1 To p1.SUD.Count
+                        If Not p1.SUD(i - 1).Equals(p2.SUD(i - 1)) Then
+                            Return False  ' different SUD
+                        End If
+                    Next
+                Else  ' different number of SUDs
+                    Return False
+                End If
+            Else  ' different component parts
+                Return False
+            End If
+        Else  ' not parser
+            Return False
+        End If
+        Return True
+    End Function
+
+#End Region
+
 #Region "-- public enum and structures --"
 
     ''' <summary>
@@ -380,13 +415,13 @@ Public Class Parser
 
         prs = prs.Replace("''", "'")
 
-        ' fix trailing f SUD ranges with single quotes
+        ' fix trailing SUD ranges with single quotes
         ' e.g, "123 MAIN ST APT 'A'" becomes "123 MAIN ST APT A"
 
         rg = GetReg("'.'$")
         If rg.IsMatch(prs) Then prs = Replace(prs, rg.Match(prs).ToString, Replace(rg.Match(prs).ToString, "'", ""))
 
-        ' omit any date and anything after it
+        ' omit any date in teh address and anything after it
 
         rg = GetReg("\d{1,2}/\d{1,2}/\d{2,4}")
         prs = rg.Replace(prs, "")
@@ -500,7 +535,7 @@ Public Class Parser
 
         Else
 
-            ' omit before hyphen that is the cross street from "Queens-style" hyphenated numbers
+            ' omit number before hyphen that is the cross street from "Queens-style" hyphenated numbers
             ' e.g., "31-35 55th Street" is "35 55th Street"
 
             rg = GetReg("\A(\d{2,3})-(\d{2,3})\s")
@@ -618,6 +653,7 @@ Public Class Parser
                         prs = rg.Replace(prs, "")
 
                     ElseIf prs Like "CALLE*" Then
+
                         ' ignore: this is the street type, the rest following it is the name, not the street suffix
 
                     Else
@@ -658,7 +694,6 @@ Public Class Parser
                                     If m.Success Then
                                         If fiPat.Abrv = "AVE" And Mid(prs, m.Index + 1) Like "AVENIDA*" Then
                                             ' do not count as "AVE"
-
                                         ElseIf fiPat.Abrv = "HTS" And prs Like "DI*MO*" Then
                                             ' do not count "DIAMOND HTS" as "HTS"
                                         ElseIf fiPat.Abrv = "PARK" And (prs Like "CLINTON *" Or prs Like "ELGIN *") Then
@@ -683,8 +718,6 @@ Public Class Parser
                                         ' e.g., 1915 81 ST AVE
                                         StSufmatch.RemoveAt(0)
                                     End If
-
-
                                 End If
                             End If
 
@@ -1100,32 +1133,12 @@ Public Class Parser
     End Sub
 
     ''' <summary>
-    ''' Parser objects are equal if all componenets are the same, even if raw address is different
+    ''' See is parser is equal to another parser.
     ''' </summary>
     ''' <param name="obj"></param>
     ''' <returns></returns>
     Public Overrides Function Equals(obj As Object) As Boolean
-        Dim i As Integer
-        If TypeOf obj Is AddressParser.Parser Then
-            With CType(obj, AddressParser.Parser)
-                If .HouseNum = Me.HouseNum And .HouseSuf = Me.HouseSuf And .PreDir = Me.PreDir And .Street = Me.Street And .StSuf = Me.StSuf And .PostDir = Me.PostDir Then
-                    If .SUD.Count = Me.SUD.Count Then
-                        For i = 1 To .SUD.Count
-                            If Not .SUD(i - 1).Equals(Me.SUD(i - 1)) Then
-                                Return False  ' different SUD
-                            End If
-                        Next
-                    Else  ' different number of SUDs
-                        Return False
-                    End If
-                Else  ' different component parts
-                    Return False
-                End If
-            End With
-        Else  ' not parser
-            Return False
-        End If
-        Return True
+        Return EqualParsers(Me, obj)
     End Function
 
 #End Region

@@ -8,10 +8,10 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("AddressParser")>
-<Assembly: AssemblyDescription("")>
+<Assembly: AssemblyDescription("Parse addresses into their component parts so that they can be validated, compared, and geocoded.")>
 <Assembly: AssemblyCompany("")>
 <Assembly: AssemblyProduct("AddressParser")>
-<Assembly: AssemblyCopyright("Copyright ©  2023")>
+<Assembly: AssemblyCopyright("Copyright ©  2026, Robert P. Kohn")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
