@@ -1,0 +1,1 @@
+This project includes code to parse the text of an address into its components, including house number, street name, street type, and secondary unit.  This is useful for standarizing the address text and for matching addresses to one another.  
