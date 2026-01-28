@@ -4,7 +4,7 @@
 ''' Class to separate address into component parts.
 ''' </summary>
 ''' <remarks>
-''' Componenets are exposed as public properties after running Parse method.
+''' Components are exposed as public properties after running Parse method.
 ''' </remarks>
 Public Class Parser
 
@@ -1239,7 +1239,7 @@ Public Class Parser
     ''' <remarks>For flag, 1 = range, 0 = no range.</remarks>
     Private Sub Setup_lstSUD()
 
-        ' use consistent patters for SUD that can have a range
+        ' use consistent patterns for SUD that can have a range
 
         ' OK if followed by number of any length, single letter, or space after optional "#"
         ' save what follws as RNG group so we can use it as the range, e.g., "RM123"
@@ -1249,11 +1249,10 @@ Public Class Parser
 
         _lstSUD = New List(Of FindPatttern)
 
-        fg = 1  ' has range
+        fg = 1  ' SUDs that have range
 
         f = New FindPatttern
         With f : .Abrv = "APT" : .Pattern = "(?:^|\b)AP(?:P|A?R)?(?:T|ARTMENT)" : .Flag = fg : End With  ' was: "(?:^|\b)AP(P|AR)?(?:T|ARTMENT)(\b|^S)" 
-
         _lstSUD.Add(f)
         f = New FindPatttern
         With f : .Abrv = "BLDG" : .Pattern = "((?:^|\b)(?:B(?:UI)?LD(?:IN)?G?)|BLDG)" : .Flag = fg : End With
@@ -1295,14 +1294,12 @@ Public Class Parser
         f = New FindPatttern
         With f : .Abrv = "PH  " : .Pattern = "(?:^|\b)P(?:ENT)?H(?:OUSE)?" : .Flag = fg : End With
         _lstSUD.Add(f)
-
         f = New FindPatttern
         With f : .Abrv = "BED" : .Pattern = "(?:^|\b)BED[^\w]\b?" : .Flag = fg : End With
         _lstSUD.Add(f)
         f = New FindPatttern
         With f : .Abrv = "#" : .Pattern = "(?:^|\b)NO\.?\s?\d" : .Flag = fg : End With
         _lstSUD.Add(f)
-
         f = New FindPatttern
         With f : .Abrv = "DORM" : .Pattern = "(?:^|\b)DORM\b" : .Flag = fg : End With
         _lstSUD.Add(f)
@@ -1311,8 +1308,9 @@ Public Class Parser
         With f : .Abrv = "FLAT" : .Pattern = "(?:^|\b)FLA?T[^S](?:\b|$)" : .Flag = fg : End With
         _lstSUD.Add(f)
 
-        fg = 0  ' no range
+        fg = 0  ' SUDs that have no range
 
+        ' NB: "Floor" has no range because we do not expect "Floor 3", and we handle "3rd floor" separately
         f = New FindPatttern
         With f : .Abrv = "FL" : .Pattern = "(?:^|\b)(?<RNG>\d+(?<SFX>ST|ND|RD|TH))\sFL(?:OOR)?" : .Flag = fg : End With
         _lstSUD.Add(f)
@@ -1337,6 +1335,8 @@ Public Class Parser
 
         Exit Sub
 
+        ' NB: these do NOT get used, they work but they cause problems with San Francisco street names:
+
         f = New FindPatttern
         With f : .Abrv = "SIDE" : .Pattern = "(?:^|\b)SIDE" : .Flag = fg : End With
         _lstSUD.Add(f)
@@ -1353,7 +1353,7 @@ Public Class Parser
     End Sub
 
     ''' <summary>
-    ''' Set up to find street types.
+    ''' Set up patterns to find street types.
     ''' </summary>
     ''' <remarks></remarks>
     Private Sub Setup_lstStSuf()
@@ -2052,8 +2052,8 @@ Public Class Parser
     ''' <summary>
     ''' Save SUD and range, remove from address.
     ''' </summary>
-    ''' <param name="prs"></param>
-    ''' <param name="rawSUD"></param>
+    ''' <param name="prs">String being parsed.</param>
+    ''' <param name="rawSUD">SUD to find.</param>
     Private Sub GetSUD(ByRef prs As String, ByRef rawSUD As String)
 
         ' for parsing with regular expressons

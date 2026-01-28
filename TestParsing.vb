@@ -1,5 +1,10 @@
-﻿Module Module2
+﻿Module TestParsing
 
+    ''' <summary>
+    ''' Public routine to call and test parser class.
+    ''' </summary>
+    ''' <param name="thisAddress">Whole address to be parsed.</param>
+    ''' <returns>Code for success.</returns>
     Public Function ShowParts(ByVal thisAddress As String) As Integer
         Dim p As New Parser()
         p.Parse(thisAddress)
